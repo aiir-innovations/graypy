@@ -23,7 +23,7 @@ from graypy.handler import (
 try:
     from graypy.rabbitmq import GELFRabbitHandler, ExcludeFilter
 except ImportError:
-    pass  # amqplib is probably not installed
+    pass  # amqp is probably not installed
 
 
-__version__ = (2, 1, 0)
+__version__ = (2, 2, 0)

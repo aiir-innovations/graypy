@@ -8,7 +8,7 @@ import json
 from logging import Filter
 from logging.handlers import SocketHandler
 
-from amqplib import client_0_8 as amqp  # pylint: disable=import-error
+import amqp  # pylint: disable=import-error
 
 from graypy.handler import BaseGELFHandler
 
@@ -27,7 +27,7 @@ class GELFRabbitHandler(BaseGELFHandler, SocketHandler):
 
     .. note::
 
-        This handler ignores all messages logged by amqplib.
+        This handler ignores all messages logged by amqp.
     """
 
     def __init__(
@@ -37,6 +37,8 @@ class GELFRabbitHandler(BaseGELFHandler, SocketHandler):
         exchange_type="fanout",
         virtual_host="/",
         routing_key="",
+        ssl=False,
+        heartbeat=0,
         **kwargs
     ):
         """Initialize the GELFRabbitHandler
@@ -56,6 +58,9 @@ class GELFRabbitHandler(BaseGELFHandler, SocketHandler):
 
         :param routing_key:
         :type routing_key: str
+
+        :param ssl: whether to add TLS to the connection
+        :type ssl: bool
         """
         self.url = url
         parsed = urlparse(url)
@@ -72,13 +77,15 @@ class GELFRabbitHandler(BaseGELFHandler, SocketHandler):
             "password": _ifnone(parsed.password, "guest"),
             "virtual_host": self.virtual_host,
             "insist": False,
+            "ssl": ssl,
+            "heartbeat": heartbeat
         }
         self.exchange = exchange
         self.exchange_type = exchange_type
         self.routing_key = routing_key
         BaseGELFHandler.__init__(self, **kwargs)
         SocketHandler.__init__(self, host, port)
-        self.addFilter(ExcludeFilter("amqplib"))
+        self.addFilter(ExcludeFilter("amqp"))
 
     def makeSocket(self, timeout=1):
         return RabbitSocket(
